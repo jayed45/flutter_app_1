@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_app_1/config/app_routes.dart';
 import 'package:flutter_app_1/config/app_strings.dart';
+import 'package:flutter_app_1/model/user.dart';
 import 'package:http/http.dart' as http;
 
 const baseUrl = 'https://localhost:8080';
@@ -72,7 +73,7 @@ class LoginPage extends StatelessWidget {
               child: ElevatedButton(
                   onPressed: () {
                     doLogin();
-                    // Navigator.of(context).pushReplacementNamed(AppRoutes.main);
+                    Navigator.of(context).pushReplacementNamed(AppRoutes.main);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.amber,
@@ -161,17 +162,21 @@ class LoginPage extends StatelessWidget {
     );
   }
 
-  Future<String> doLogin() async {
+  Future<User> doLogin() async {
     final username = usernameController.text;
     final password = passwordController.text;
     final body = {
       'username': username,
       'password': password,
-    }
+    };
 
-    final response = await http.post(Uri.parse(loginRoute), body: jsonEncode(body));
+    final response =
+        await http.post(Uri.parse(loginRoute), body: jsonEncode(body));
     if (response.statusCode == 200) {
-      return response.body;
+      print("Login successful");
+      final json = jsonDecode(response.body);
+      final user = User.fromJson(json);
+      return user;
     } else {
       print('Error!');
       throw Exception('Error');
