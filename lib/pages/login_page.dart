@@ -1,9 +1,19 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_app_1/config/app_routes.dart';
 import 'package:flutter_app_1/config/app_strings.dart';
+import 'package:http/http.dart' as http;
+
+const baseUrl = 'https://localhost:8080';
 
 class LoginPage extends StatelessWidget {
-  const LoginPage({super.key});
+  final loginRoute = '$baseUrl/login';
+
+  final usernameController = TextEditingController();
+  final passwordController = TextEditingController();
+
+  LoginPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -27,6 +37,7 @@ class LoginPage extends StatelessWidget {
               style: TextStyle(color: Colors.white),
             ),
             TextField(
+              controller: usernameController,
               decoration: InputDecoration(
                   hintText: AppStrings.username,
                   border: const OutlineInputBorder(
@@ -36,6 +47,7 @@ class LoginPage extends StatelessWidget {
                   fillColor: Colors.white.withOpacity(0.8)),
             ),
             TextField(
+              controller: passwordController,
               decoration: InputDecoration(
                 hintText: AppStrings.password,
                 border: const OutlineInputBorder(
@@ -59,7 +71,8 @@ class LoginPage extends StatelessWidget {
               width: 200,
               child: ElevatedButton(
                   onPressed: () {
-                    Navigator.of(context).pushReplacementNamed(AppRoutes.main);
+                    doLogin();
+                    // Navigator.of(context).pushReplacementNamed(AppRoutes.main);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.amber,
@@ -146,5 +159,22 @@ class LoginPage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<String> doLogin() async {
+    final username = usernameController.text;
+    final password = passwordController.text;
+    final body = {
+      'username': username,
+      'password': password,
+    }
+
+    final response = await http.post(Uri.parse(loginRoute), body: jsonEncode(body));
+    if (response.statusCode == 200) {
+      return response.body;
+    } else {
+      print('Error!');
+      throw Exception('Error');
+    }
   }
 }
